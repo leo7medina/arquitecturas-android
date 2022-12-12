@@ -1,32 +1,21 @@
-package com.example.apparquitectura
+package com.example.apparquitectura.model
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.util.Log
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.apparquitectura.model.ApiAdapter
+import com.example.apparquitectura.presenter.ICouponPresenter
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        supportActionBar?.hide()
+class CouponRepositoryImpl(var couponPresenter: ICouponPresenter): ICouponRepository {
 
-        //VIEW
-        val rvCoupons: RecyclerView = findViewById(R.id.rvCoupons)
-        rvCoupons.layoutManager = LinearLayoutManager(this)
-        val coupons = ArrayList<Coupon>()
-
-        //CONTROLLER
+    //TODa la logica de conexion
+    override fun getCouponsAPI() {
         val apiAdapter = ApiAdapter();
         val apiService = apiAdapter.getClientService()
         val call = apiService.getCoupons()
+        val coupons: ArrayList<Coupon>? = ArrayList()
 
         call.enqueue(object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
@@ -39,13 +28,12 @@ class MainActivity : AppCompatActivity() {
                 offersJsonArray?.forEach { jsonElement: JsonElement ->
                     var jsonObject = jsonElement.asJsonObject
                     var coupon = Coupon(jsonObject)
-                    coupons.add(coupon)
+                    coupons?.add(coupon)
                 }
-                //VIEW
-                rvCoupons.adapter = RecyclerCouponsAdapter(coupons, R.layout.card_coupon)
-                //VIEW
+                //View
+                couponPresenter.showCoupons(coupons)
             }
         })
-        //CONTROLLER
+
     }
 }

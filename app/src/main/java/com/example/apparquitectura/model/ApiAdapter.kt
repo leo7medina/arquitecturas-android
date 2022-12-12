@@ -9,7 +9,7 @@ class ApiAdapter {
     val apiKey = "69d1837829128f9565368ca704c63207"
     val urlApi = "http://feed.linkmydeals.com/"
 
-    fun getClientService(): ApiService {
+    fun getClientService(): IApiService {
         val authInterceptor = Interceptor { chain ->
             val url = chain.request().url().newBuilder()
                 .addQueryParameter("API_KEY", apiKey)
@@ -33,6 +33,6 @@ class ApiAdapter {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        return  retrofit.create(ApiService::class.java)
+        return  retrofit.create(IApiService::class.java)
     }
 }
