@@ -1,21 +1,26 @@
 package com.example.apparquitectura.model
 
 import android.util.Log
-import com.example.apparquitectura.presenter.ICouponPresenter
+import androidx.lifecycle.MutableLiveData
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class CouponRepositoryImpl(var couponPresenter: ICouponPresenter): ICouponRepository {
+class CouponRepositoryImpl(): ICouponRepository {
 
-    //TODa la logica de conexion
-    override fun getCouponsAPI() {
+    private var coupons = MutableLiveData<List<Coupon>>()
+
+    override fun getCoupons(): MutableLiveData<List<Coupon>> {
+        return coupons
+    }
+
+    override fun callCouponsAPI() {
         val apiAdapter = ApiAdapter();
         val apiService = apiAdapter.getClientService()
         val call = apiService.getCoupons()
-        val coupons: ArrayList<Coupon>? = ArrayList()
+        val couponsList: ArrayList<Coupon>? = ArrayList()
 
         call.enqueue(object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
@@ -26,14 +31,13 @@ class CouponRepositoryImpl(var couponPresenter: ICouponPresenter): ICouponReposi
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 val offersJsonArray = response.body()?.getAsJsonArray("offers")
                 offersJsonArray?.forEach { jsonElement: JsonElement ->
-                    var jsonObject = jsonElement.asJsonObject
-                    var coupon = Coupon(jsonObject)
-                    coupons?.add(coupon)
+                    val jsonObject = jsonElement.asJsonObject
+                    val coupon = Coupon(jsonObject)
+                    couponsList?.add(coupon)
                 }
                 //View
-                couponPresenter.showCoupons(coupons)
+                coupons.value = couponsList
             }
         })
-
     }
 }
